@@ -34,7 +34,8 @@ class SacredLogger(LightningLoggerBase):
         if self._run_id is not None:
             return self._run_id
 
-        self._run_id = self.sacred_experiment.current_run._id
+        self._run_id = str(self.sacred_experiment.current_run.db_identifier)\
+                       + "_" +str(self.sacred_experiment.current_run._id)
         return self._run_id
 
     @rank_zero_only

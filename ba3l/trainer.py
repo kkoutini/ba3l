@@ -126,9 +126,10 @@ class Trainer(plTrainer, Ingredient):
 
         self.__validation_loaders = None
         self.__testing_loaders = None
-
         bind(self, self.command(plTrainer.__init__), "init_trainer")
-        self.add_config(logger=CMD("/get_sacred_logger"))
+        self.add_config(default_root_dir="./output/")
+
+        self.add_config(logger=CMD(".get_loggers"))
 
         def get_trainer(self, *args, **kw):
             self.init_trainer(*args, **kw)
@@ -171,19 +172,6 @@ class Trainer(plTrainer, Ingredient):
     #     self.commands[Trainer.TRAINER_STRING_PREFIX] = captured_f
     #     self.get_trainer = captured_f
     #     return captured_f
-    def add_default_args_config(self, function, extra_args={}, static_args={}):
-        """
-        adds the default parameters of a function to the ingredient config at lowest priority!
-        Default args config is meant remove the need to declare all the configurations manually.
-        :param f: the function
-        """
-        # @todo get the doc of the params as well
-        config_candidate = {**get_default_kwargs_dict(function), **extra_args}
-        # remove "static_args" from config
-        for k in static_args:
-            config_candidate.pop(k, None)
-
-        self.configurations.insert(0, self._create_config_dict(config_candidate, None))
 
     #
     # @optional_kwargs_decorator

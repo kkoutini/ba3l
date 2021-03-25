@@ -10,6 +10,7 @@ from typing import Sequence, Optional, List
 from sacred.commandline_options import CLIOption
 from sacred.host_info import HostInfoGetter
 from sacred.utils import PathType
+from pytorch_lightning import loggers as pl_loggers
 
 
 def ingredients_recursive_apply(ing, fn):
@@ -18,9 +19,12 @@ def ingredients_recursive_apply(ing, fn):
         ingredients_recursive_apply(kid, fn)
 
 
-def get_sacred_logger(expr):
-    return SacredLogger(expr)
-
+def get_loggers(expr, use_tensorboard_logger=False):
+    sacred_logger = SacredLogger(expr)
+    loggers = [sacred_logger]
+    if use_tensorboard_logger:
+        loggers.append(pl_loggers.TensorBoardLogger(sacred_logger.name))
+    return loggers
 
 class Experiment(Sacred_Experiment):
     """
@@ -94,7 +98,7 @@ class Experiment(Sacred_Experiment):
             additional_cli_options=additional_cli_options,
             save_git_info=save_git_info,
         )
-        self.command(get_sacred_logger, static_args={"expr": self})
+        self.trainer.command(get_loggers, static_args={"expr": self})
         # filling out Default config
 
     def get_trainer(self, *args, **kw):

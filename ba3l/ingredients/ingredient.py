@@ -79,6 +79,7 @@ class Ingredient(sacred_Ingredient):
         )
 
         self.current_run = None
+        self.last_default_configuration_position = 0
 
     def add_default_args_config(self, function, extra_args={}, static_args={}):
         """
@@ -92,18 +93,17 @@ class Ingredient(sacred_Ingredient):
         for k in static_args:
             config_candidate.pop(k, None)
 
-        self.configurations.insert(0, self._create_config_dict(config_candidate, None))
+        self.configurations.insert(self.last_default_configuration_position, self._create_config_dict(config_candidate, None))
+        self.last_default_configuration_position += 1
 
     @optional_kwargs_decorator
     def command(
-        self, function=None, prefix=None, unobserved=False, static_args={}, **extra_args
+        self, function=None, prefix=None, unobserved=False, add_default_args_config=True, static_args={}, **extra_args
     ):
         """
-        Decorator to define a new Dataset.
+        Decorator to define a new Command.
 
-        The name of the dataset is used to get an instance of the dataset, it will register a command
-
-        Datasets are sacred commands.
+        a command is a function whose parameters are filled automatically by sacred.
 
         The command can be given a prefix, to restrict its configuration space
         to a subtree. (see ``capture`` for more information)
@@ -122,7 +122,8 @@ class Ingredient(sacred_Ingredient):
 
 
         """
-        self.add_default_args_config(function, extra_args, static_args=static_args)
+        if add_default_args_config:
+            self.add_default_args_config(function, extra_args, static_args=static_args)
         captured_f = self.capture(function, prefix=prefix, static_args=static_args)
         captured_f.unobserved = unobserved
         self.commands[function.__name__] = captured_f
