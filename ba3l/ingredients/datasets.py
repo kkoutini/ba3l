@@ -3,14 +3,13 @@ import os
 from functools import partial
 
 from ba3l.util.functions import get_default_kwargs_dict
-from sacred.config.utils import CMD
+from sacred.config import CMD
 from .ingredient import Ingredient
 
 from typing import Sequence, Optional, List
 
 from sacred.utils import PathType, optional_kwargs_decorator
 from munch import DefaultFactoryMunch, Munch
-
 
 def raise_(ex):
     raise ex

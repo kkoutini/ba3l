@@ -17,7 +17,7 @@ We redesign much of lightening Object-Oriented desgin to fit with ETHIC.
 The result is scalable, very modular, very configuarble framework.
 
 ## Caution
-Sacred and pytorch-lightening  should not be installed on the same environment as Ba3l since there is a modified and packaged version with pyzeus.
+Sacred and pytorch-lightening should not be installed on the same environment as Ba3l, since there is a modified and packaged version with pyzeus.
 
 If the Sacred and pytorch-lightening versions were not installed automaticaly. you can use the following commands:
 ```shell script

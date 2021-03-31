@@ -1,13 +1,16 @@
+import inspect
 from importlib import import_module
 
 from ba3l.ingredients.datasets import Datasets
 from ba3l.ingredients.models import Models, Model
 from ba3l.trainer import Trainer
 from ba3l.util.sacred_logger import SacredLogger
+from ba3l.plutils.progress_bar import ProgressBar
 from sacred import Experiment as Sacred_Experiment, Ingredient
 from typing import Sequence, Optional, List
 
 from sacred.commandline_options import CLIOption
+from sacred.config import CMD
 from sacred.host_info import HostInfoGetter
 from sacred.utils import PathType
 from pytorch_lightning import loggers as pl_loggers
@@ -18,6 +21,13 @@ def ingredients_recursive_apply(ing, fn):
     for kid in ing.ingredients:
         ingredients_recursive_apply(kid, fn)
 
+def config_recursive_apply(conf, fn):
+    for k,v in conf.items():
+        if isinstance(v, dict):
+            config_recursive_apply(v,fn)
+        else:
+            fn(k,v)
+
 
 def get_loggers(expr, use_tensorboard_logger=False):
     sacred_logger = SacredLogger(expr)
@@ -25,6 +35,10 @@ def get_loggers(expr, use_tensorboard_logger=False):
     if use_tensorboard_logger:
         loggers.append(pl_loggers.TensorBoardLogger(sacred_logger.name))
     return loggers
+
+
+def get_callbacks(expr):
+    return [ProgressBar()]
 
 class Experiment(Sacred_Experiment):
     """
@@ -89,6 +103,7 @@ class Experiment(Sacred_Experiment):
         if ingredients is None:
             ingredients = []
         ingredients = list(ingredients) + [models, datasets, trainer]
+        caller_globals = inspect.stack()[1][0].f_globals
         super().__init__(
             name=name,
             ingredients=ingredients,
@@ -97,8 +112,10 @@ class Experiment(Sacred_Experiment):
             additional_host_info=additional_host_info,
             additional_cli_options=additional_cli_options,
             save_git_info=save_git_info,
+            caller_globals=caller_globals
         )
         self.trainer.command(get_loggers, static_args={"expr": self})
+        self.trainer.command(get_callbacks, static_args={"expr": self})
         # filling out Default config
 
     def get_trainer(self, *args, **kw):
@@ -133,24 +150,7 @@ class Experiment(Sacred_Experiment):
             # @todo replace with logger
             print("Warning: multiple runs are not yet supported")
 
-        run = super()._create_run(
-            command_name,
-            config_updates,
-            named_configs,
-            info,
-            meta_info,
-            options,
-            dry_run=True,
-        )
 
-        # lazy model loading
-        for k, v in run.config.get("models", {}).items():
-            cls = getattr(
-                import_module(v["path"].rsplit(".", 1)[0]), v["path"].rsplit(".", 1)[1]
-            )
-            model = Model("models." + k)
-            model.instance(cls)
-            self.models.ingredients.append(model)
         run = super()._create_run(
             command_name,
             config_updates,
@@ -160,10 +160,12 @@ class Experiment(Sacred_Experiment):
             options,
             dry_run=False,
         )
-
-        def update_current_run(ing):
-            ing.current_run = run
-
-        ingredients_recursive_apply(self, update_current_run)
+        # self.current_run=run
+        # def update_current_run(ing):
+        #     ing.current_run = run
+        #
+        # ingredients_recursive_apply(self, update_current_run)
 
         return run
+
+

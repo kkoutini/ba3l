@@ -6,7 +6,7 @@ import inspect
 import os
 
 from ba3l.util.functions import get_default_kwargs_dict
-from sacred.config.utils import CMD
+from sacred.config import CMD
 from .ingredients.datasets import Datasets, raise_
 from .ingredients.models import Models
 from .ingredients.ingredient import Ingredient
@@ -130,6 +130,7 @@ class Trainer(plTrainer, Ingredient):
         self.add_config(default_root_dir="./output/")
 
         self.add_config(logger=CMD(".get_loggers"))
+        self.add_config(callbacks=CMD(".get_callbacks"))
 
         def get_trainer(self, *args, **kw):
             self.init_trainer(*args, **kw)
@@ -138,73 +139,6 @@ class Trainer(plTrainer, Ingredient):
         # self.get_trainer = bind(self, self.command(get_trainer), "get_trainer")
         self.get_trainer = bind(self, get_trainer, "get_trainer")
 
-        # self.command(get_dataset_iterator_command, unobserved=True)
-
-    # @optional_kwargs_decorator
-    # def trainer(self, function=None, prefix=None, unobserved=False, static_args={}, **extra_args):
-    #     """
-    #     Decorator to define a new Dataset.
-    #
-    #     The name of the dataset is used to get an instance of the dataset, it will register a command
-    #
-    #     Datasets are sacred commands.
-    #
-    #     The command can be given a prefix, to restrict its configuration space
-    #     to a subtree. (see ``capture`` for more information)
-    #
-    #     A command can be made unobserved (i.e. ignoring all observers) by
-    #     passing the unobserved=True keyword argument.
-    #     :param function: the function to return a Dataset Object
-    #     :param prefix: sacred configuration prefix
-    #     :param unobserved: sacred unobserved
-    #     :param static_args: static Args to be passed to the function, these arg need not to be serlizable and
-    #      are not stored in the config
-    #     :param extra_args: explicit arguments to be add to the config, you can these to override the function default
-    #     values, for example wraping a config with CMD, then the parameter will be filled with excuting the command
-    #     specified by CMD string value. CMD string have special context
-    #     :return:
-    #
-    #
-    #     """
-    #     self.add_default_args_config(function, extra_args, static_args=static_args)
-    #     captured_f = self.capture(function, prefix=prefix, static_args=static_args)
-    #     captured_f.unobserved = unobserved
-    #     self.commands[Trainer.TRAINER_STRING_PREFIX] = captured_f
-    #     self.get_trainer = captured_f
-    #     return captured_f
-
-    #
-    # @optional_kwargs_decorator
-    # def command(self, function=None, prefix=None, unobserved=False, static_args={}, **extra_args):
-    #     """
-    #     Decorator to define a new Dataset.
-    #
-    #     The name of the dataset is used to get an instance of the dataset, it will register a command
-    #
-    #     Datasets are sacred commands.
-    #
-    #     The command can be given a prefix, to restrict its configuration space
-    #     to a subtree. (see ``capture`` for more information)
-    #
-    #     A command can be made unobserved (i.e. ignoring all observers) by
-    #     passing the unobserved=True keyword argument.
-    #     :param function: the function to return a Dataset Object
-    #     :param prefix: sacred configuration prefix
-    #     :param unobserved: sacred unobserved
-    #     :param static_args: static Args to be passed to the function, these arg need not to be serlizable and
-    #      are not stored in the config
-    #     :param extra_args: explicit arguments to be add to the config, you can these to override the function default
-    #     values, for example wraping a config with CMD, then the parameter will be filled with excuting the command
-    #     specified by CMD string value. CMD string have special context
-    #     :return:
-    #
-    #
-    #     """
-    #     self.add_default_args_config(function, extra_args, static_args=static_args)
-    #     captured_f = self.capture(function, prefix=prefix, static_args=static_args)
-    #     captured_f.unobserved = unobserved
-    #     self.commands[function.__name__] = captured_f
-    #     return captured_f
 
     def init_train_dataloader(self, model):
         """

@@ -10,7 +10,7 @@ from ba3l.ingredients import datasets, models
 
 from ba3l.experiment import Experiment
 from ba3l.module import Ba3lModule
-from sacred.config.utils import CMD
+from sacred.config import CMD
 import pytorch_lightning as pl
 
 from ba3l.trainer import Trainer as pzTrainer

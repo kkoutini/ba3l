@@ -33,5 +33,7 @@ class Ba3lModule(pl.LightningModule):
     def __init__(self, experiment):
         super(Ba3lModule, self).__init__()
         self.experiment = experiment
-        for model in experiment.models.ingredients:
-            setattr(self, model.name, model.get_instance())
+        for key,model in experiment.current_run.config['models'].items():
+            setattr(self, key, experiment.current_run.get_command_function("models."+key+"."+model['instance_cmd'])())
+        # for model in experiment.models.ingredients:
+        #     setattr(self, model.name, model.get_instance())

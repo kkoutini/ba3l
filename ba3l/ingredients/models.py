@@ -12,7 +12,7 @@ import os
 from functools import partial
 
 from ba3l.util.functions import get_default_kwargs_dict
-from sacred.config.utils import CMD
+from sacred.config import CMD
 from .ingredient import Ingredient
 
 from typing import Sequence, Optional, List
