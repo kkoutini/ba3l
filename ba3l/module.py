@@ -4,6 +4,7 @@ import warnings
 from abc import ABC
 
 import torch.distributed as dist
+from munch import DefaultMunch
 
 try:
     # loading for pyTorch 1.3
@@ -33,6 +34,7 @@ class Ba3lModule(pl.LightningModule):
     def __init__(self, experiment):
         super(Ba3lModule, self).__init__()
         self.experiment = experiment
+        self.config = DefaultMunch.fromDict(experiment.current_run.config)
         for key,model in experiment.current_run.config['models'].items():
             setattr(self, key, experiment.current_run.get_command_function("models."+key+"."+model['instance_cmd'])())
         # for model in experiment.models.ingredients:

@@ -3,6 +3,7 @@ from importlib import import_module
 
 from ba3l.ingredients.datasets import Datasets
 from ba3l.ingredients.models import Models, Model
+from ba3l.plutils.lr_monitor import LearningRateMonitor
 from ba3l.trainer import Trainer
 from ba3l.util.sacred_logger import SacredLogger
 from ba3l.plutils.progress_bar import ProgressBar
@@ -38,7 +39,7 @@ def get_loggers(expr, use_tensorboard_logger=False):
 
 
 def get_callbacks(expr):
-    return [ProgressBar()]
+    return [ProgressBar(), LearningRateMonitor(logging_interval='epoch')]
 
 class Experiment(Sacred_Experiment):
     """
