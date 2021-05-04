@@ -123,7 +123,7 @@ class Dataset(Ingredient):
 
 
         """
-        self.add_default_args_config(function, extra_args, static_args=static_args)
+        self.add_default_args_config(function, prefix, extra_args, static_args=static_args)
         captured_f = self.capture(function, prefix=prefix, static_args=static_args)
         captured_f.unobserved = unobserved
         self.commands[Dataset.DATASET_STRING_PREFIX] = captured_f
@@ -156,7 +156,7 @@ class Dataset(Ingredient):
         values, for example wraping a config with CMD, then the parameter will be filled with excuting the command
         specified by CMD string value. CMD string have special context
         """
-        self.add_default_args_config(function, extra_args, static_args=static_args)
+        self.add_default_args_config(function, prefix, extra_args, static_args=static_args)
 
         captured_f = self.capture(function, prefix=prefix, static_args=static_args)
         captured_f.unobserved = unobserved

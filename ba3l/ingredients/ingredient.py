@@ -81,7 +81,7 @@ class Ingredient(sacred_Ingredient):
         self.current_run = None
         self.last_default_configuration_position = 0
 
-    def add_default_args_config(self, function, extra_args={}, static_args={}):
+    def add_default_args_config(self, function, prefix, extra_args={}, static_args={}):
         """
         adds the default parameters of a function to the ingredient config at lowest priority!
         Default args config is meant remove the need to declare all the configurations manually.
@@ -92,7 +92,9 @@ class Ingredient(sacred_Ingredient):
         # remove "static_args" from config
         for k in static_args:
             config_candidate.pop(k, None)
-
+        if prefix is not None:
+            for pr in prefix.split('.')[::-1]:
+                config_candidate={pr: config_candidate}
         self.configurations.insert(self.last_default_configuration_position, self._create_config_dict(config_candidate, None))
         self.last_default_configuration_position += 1
 
@@ -123,7 +125,7 @@ class Ingredient(sacred_Ingredient):
 
         """
         if add_default_args_config:
-            self.add_default_args_config(function, extra_args, static_args=static_args)
+            self.add_default_args_config(function, prefix, extra_args, static_args=static_args)
         captured_f = self.capture(function, prefix=prefix, static_args=static_args)
         captured_f.unobserved = unobserved
         self.commands[function.__name__] = captured_f

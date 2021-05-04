@@ -199,7 +199,7 @@ class Model(Ingredient):
 
 
         """
-        self.add_default_args_config(function, extra_args, static_args=static_args)
+        self.add_default_args_config(function, prefix, extra_args, static_args=static_args)
         captured_f = self.capture(function, prefix=prefix, static_args=static_args)
         captured_f.unobserved = unobserved
         self.commands[Model.MODEL_STRING_PREFIX] = captured_f

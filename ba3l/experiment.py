@@ -13,8 +13,9 @@ from typing import Sequence, Optional, List
 from sacred.commandline_options import CLIOption
 from sacred.config import CMD
 from sacred.host_info import HostInfoGetter
-from sacred.utils import PathType
+from sacred.utils import PathType, optional_kwargs_decorator
 from pytorch_lightning import loggers as pl_loggers
+from ba3l.util.functions import get_default_kwargs_dict
 
 
 def ingredients_recursive_apply(ing, fn):
@@ -105,6 +106,7 @@ class Experiment(Sacred_Experiment):
             ingredients = []
         ingredients = list(ingredients) + [models, datasets, trainer]
         caller_globals = inspect.stack()[1][0].f_globals
+        self.last_default_configuration_position = 0
         super().__init__(
             name=name,
             ingredients=ingredients,
@@ -169,4 +171,58 @@ class Experiment(Sacred_Experiment):
 
         return run
 
+    @optional_kwargs_decorator
+    def command(
+            self, function=None, prefix=None, unobserved=False, add_default_args_config=True, static_args={},
+            **extra_args
+    ):
+        """
+        Decorator to define a new Command.
 
+        a command is a function whose parameters are filled automatically by sacred.
+
+        The command can be given a prefix, to restrict its configuration space
+        to a subtree. (see ``capture`` for more information)
+
+        A command can be made unobserved (i.e. ignoring all observers) by
+        passing the unobserved=True keyword argument.
+        :param add_default_args_config: wether to add the default arguments of the function to the config automatically.
+        :param function: the function to return a Dataset Object
+        :param prefix: sacred configuration prefix
+        :param unobserved: sacred unobserved
+        :param static_args: static Args to be passed to the function, these arg need not to be serlizable and
+         are not stored in the config
+        :param extra_args: explicit arguments to be add to the config, you can these to override the function default
+        values, for example wraping a config with CMD, then the parameter will be filled with excuting the command
+        specified by CMD string value. CMD string have special context
+        :return:
+
+
+        """
+        add_default_args_config = (not unobserved) and add_default_args_config
+        if add_default_args_config:
+            self.add_default_args_config(function, prefix, extra_args, static_args=static_args)
+        captured_f = self.capture(function, prefix=prefix, static_args=static_args)
+        captured_f.unobserved = unobserved
+        self.commands[function.__name__] = captured_f
+        return captured_f
+
+
+    def add_default_args_config(self, function, prefix, extra_args={}, static_args={}):
+        """
+        adds the default parameters of a function to the ingredient config at lowest priority!
+        Default args config is meant remove the need to declare all the configurations manually.
+        :param f: the function
+        """
+        # @todo get the doc of the params as well
+        config_candidate = {**get_default_kwargs_dict(function), **extra_args}
+        # remove "static_args" from config
+        for k in static_args:
+            config_candidate.pop(k, None)
+        # respect the prefix for the added default parameters
+        if prefix is not None:
+            for pr in prefix.split('.')[::-1]:
+                config_candidate={pr: config_candidate}
+
+        self.configurations.insert(self.last_default_configuration_position, self._create_config_dict(config_candidate, None))
+        self.last_default_configuration_position += 1
