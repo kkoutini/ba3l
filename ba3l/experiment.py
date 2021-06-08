@@ -121,6 +121,10 @@ class Experiment(Sacred_Experiment):
         self.trainer.command(get_callbacks, static_args={"expr": self})
         # filling out Default config
 
+    def get_run_identifier(self):
+        return str(self.current_run.db_identifier) \
+            + "_" + str(self.current_run._id)
+
     def get_trainer(self, *args, **kw):
         return self.trainer.get_trainer(*args, **kw)
 
