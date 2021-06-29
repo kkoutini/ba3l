@@ -1,5 +1,3 @@
-import traceback
-
 from pytorch_lightning.utilities import rank_zero_only
 from pytorch_lightning.loggers import LightningLoggerBase
 from pytorch_lightning.loggers.base import rank_zero_experiment
@@ -35,6 +33,7 @@ class SacredLogger(LightningLoggerBase):
     def run_id(self):
         if self._run_id is not None:
             return self._run_id
+        self._run_id = self.sacred_experiment.get_run_identifier()
         return self._run_id
 
     @rank_zero_only
