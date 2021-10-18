@@ -105,7 +105,7 @@ class ProgressBar(PlProgressBar):
         if trainer.sanity_checking:
             reset(self.val_progress_bar, sum(trainer.num_sanity_val_batches))
         else:
-            if self.main_progress_bar:
+            if self.main_progress_bar is not None:
                 self.main_progress_bar.close()
             self.val_progress_bar = self.init_validation_tqdm()
             reset(self.val_progress_bar, self.total_val_batches)
