@@ -21,9 +21,9 @@ Sacred and pytorch-lightening should not be installed on the same environment as
 
 If the Sacred and pytorch-lightening versions were not installed automaticaly. you can use the following commands:
 ```shell script
-pip install https://github.com/kkoutini/sacred/archive/ba3l.zip
+pip install -e 'git+https://github.com/kkoutini/pytorch-lightning@v0.0.1#egg=pytorch-lightning'
 # or
-pip install https://github.com/kkoutini/pytorch-lightning/archive/ba3l.zip
+pip install -e 'git+https://github.com/kkoutini/sacred@v0.0.1#egg=sacred' 
 ```
 
 ### Sacred modifications
